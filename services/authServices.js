@@ -2,17 +2,18 @@ const bcrypt = require('bcrypt');
 const userService = require("./userServices")
 const error = require("../utils/error")
 
-const registerService = async ({username, email, password}) => {
+const registerService = async ({username, email, password, roles=["STUDENT"], accountStatus="PENDING"}) => {
     let user = await userService.findUser("email", email)
     if (user) {
         throw error.createError("User already exists!");
-   }
+   } 
     
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(password, salt);
     password = hash;
-     user = await userService.createNewUser({username, email, password})
+     user = await userService.createNewUser({username, email, password, roles, accountStatus})
     const displayUser = {
+        _id: user._id,
         username: user.username,
         email: user.email,
         roles: user.roles,
@@ -32,6 +33,7 @@ const loginService = async ({email, password}) => {
     }
     
     const displayUser = {
+        _id: user._id,
         username: user.username,
         email: user.email,
         roles: user.roles,
